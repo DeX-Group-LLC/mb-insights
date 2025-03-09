@@ -75,15 +75,15 @@
                         <span matListItemTitle>{{ getThemeLabel(themeService.theme || 'system') }}</span>
                     </a>
                     <mat-menu #themeMenu="matMenu" class="theme-menu">
-                        <button mat-menu-item (click)="setTheme('light')" [class.active]="themeService.theme === 'light'">
+                        <button mat-menu-item (click)="setTheme('light')" [class.active]="themeService.theme === 'light'" class="light-theme-preview">
                             <mat-icon class="palette-icon">light_mode</mat-icon>
                             <span>Light</span>
                         </button>
-                        <button mat-menu-item (click)="setTheme('dark')" [class.active]="themeService.theme === 'dark'">
+                        <button mat-menu-item (click)="setTheme('dark')" [class.active]="themeService.theme === 'dark'" class="dark-theme-preview">
                             <mat-icon class="palette-icon">dark_mode</mat-icon>
                             <span>Dark</span>
                         </button>
-                        <button mat-menu-item (click)="setTheme('system')" [class.active]="themeService.theme === 'system'">
+                        <button mat-menu-item (click)="setTheme('system')" [class.active]="themeService.theme === 'system'" class="auto-theme-preview">
                             <mat-icon class="palette-icon">brightness_auto</mat-icon>
                             <span>System</span>
                         </button>
