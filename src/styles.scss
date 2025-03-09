@@ -33,7 +33,7 @@ body {
 }
 
 // Color palette themes
-.red-palette {
+.red-palette, body:has( mat-option.red-palette:hover) {
     @include mat.theme(
         (
             color: mat.$red-palette,
@@ -43,7 +43,7 @@ body {
     );
 }
 
-.green-palette {
+.green-palette, body:has( mat-option.green-palette:hover) {
     @include mat.theme(
         (
             color: mat.$green-palette,
@@ -53,7 +53,7 @@ body {
     );
 }
 
-.blue-palette {
+.blue-palette, body:has( mat-option.blue-palette:hover) {
     @include mat.theme(
         (
             color: mat.$blue-palette,
@@ -63,7 +63,7 @@ body {
     );
 }
 
-.yellow-palette {
+.yellow-palette, body:has( mat-option.yellow-palette:hover) {
     @include mat.theme(
         (
             color: mat.$yellow-palette,
@@ -73,7 +73,7 @@ body {
     );
 }
 
-.cyan-palette {
+.cyan-palette, body:has( mat-option.cyan-palette:hover) {
     @include mat.theme(
         (
             color: mat.$cyan-palette,
@@ -83,7 +83,7 @@ body {
     );
 }
 
-.magenta-palette {
+.magenta-palette, body:has( mat-option.magenta-palette:hover) {
     @include mat.theme(
         (
             color: mat.$magenta-palette,
@@ -93,7 +93,7 @@ body {
     );
 }
 
-.orange-palette {
+.orange-palette, body:has( mat-option.orange-palette:hover) {
     @include mat.theme(
         (
             color: mat.$orange-palette,
@@ -103,7 +103,7 @@ body {
     );
 }
 
-.chartreuse-palette {
+.chartreuse-palette, body:has( mat-option.chartreuse-palette:hover) {
     @include mat.theme(
         (
             color: mat.$chartreuse-palette,
@@ -113,7 +113,7 @@ body {
     );
 }
 
-.spring-green-palette {
+.spring-green-palette, body:has( mat-option.spring-green-palette:hover) {
     @include mat.theme(
         (
             color: mat.$spring-green-palette,
@@ -123,7 +123,7 @@ body {
     );
 }
 
-.azure-palette {
+.azure-palette, body:has( mat-option.azure-palette:hover) {
     @include mat.theme(
         (
             color: mat.$azure-palette,
@@ -133,7 +133,7 @@ body {
     );
 }
 
-.violet-palette {
+.violet-palette, body:has( mat-option.violet-palette:hover) {
     @include mat.theme(
         (
             color: mat.$violet-palette,
@@ -143,7 +143,7 @@ body {
     );
 }
 
-.rose-palette {
+.rose-palette, body:has( mat-option.rose-palette:hover) {
     @include mat.theme(
         (
             color: mat.$rose-palette,
