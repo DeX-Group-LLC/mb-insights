@@ -48,30 +48,32 @@ interface ExportOptions {
         MatSnackBarModule,
         MatCardModule,
         MatCardTitle,
-        MatCardHeader
+        MatCardHeader,
     ],
     templateUrl: './customizer.component.html',
-    styleUrls: ['./customizer.component.scss']
+    styleUrls: ['./customizer.component.scss'],
 })
 export class ExportCustomizerComponent implements OnInit, AfterViewInit {
     selectedFields: FieldSelection[] = [];
     options: ExportOptions = {
         // Common defaults
         dateFormat: 'iso',
-        maxArrayItems: null,  // all
-        maxObjectKeys: null,  // all
+        maxArrayItems: null, // all
+        maxObjectKeys: null, // all
 
         // CSV defaults
         fieldDelimiter: ',',
         arrayFormat: 'json',
-        objectFormat: 'json'
+        objectFormat: 'json',
     };
     preview: string = '';
+    previewData: any = [];
 
     constructor(
         public dialogRef: MatDialogRef<ExportCustomizerComponent>,
         private snackBar: MatSnackBar,
-        @Inject(MAT_DIALOG_DATA) public data: {
+        @Inject(MAT_DIALOG_DATA)
+        public data: {
             exportData: ExportData;
             options?: SerializationOptions;
             format: 'csv' | 'json';
@@ -84,12 +86,15 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
             maxObjectKeys: null,
 
             // CSV defaults (only set if format is CSV)
-            ...(data.format === 'csv' ? {
-                fieldDelimiter: ',',
-                arrayFormat: 'json',
-                objectFormat: 'json'
-            } : {})
+            ...(data.format === 'csv'
+                ? {
+                      fieldDelimiter: ',',
+                      arrayFormat: 'json',
+                      objectFormat: 'json',
+                  }
+                : {}),
         };
+        this.previewData = this.data.exportData.data.slice(0, 3);
     }
 
     ngOnInit(): void {
@@ -101,9 +106,12 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         // Set up ResizeObserver to update options section height
         const fieldsSection = document.querySelector('.fields-section');
         if (fieldsSection) {
-            const resizeObserver = new ResizeObserver(entries => {
+            const resizeObserver = new ResizeObserver((entries) => {
                 for (const entry of entries) {
-                    document.documentElement.style.setProperty('--fields-height', `${entry.contentRect.height}px`);
+                    document.documentElement.style.setProperty(
+                        '--fields-height',
+                        `${entry.contentRect.height}px`
+                    );
                 }
             });
             resizeObserver.observe(fieldsSection);
@@ -114,7 +122,9 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
      * Initializes field selection from the data
      */
     private initializeFieldSelection(): void {
-        this.selectedFields = initializeFieldSelection(this.data.exportData.data);
+        this.selectedFields = initializeFieldSelection(
+            this.data.exportData.data
+        );
     }
 
     /**
@@ -136,7 +146,10 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
     /**
      * Recursively sets selection state of child fields
      */
-    private setChildrenSelection(children: FieldSelection[], included: boolean): void {
+    private setChildrenSelection(
+        children: FieldSelection[],
+        included: boolean
+    ): void {
         for (const child of children) {
             child.included = included;
             if (child.children) {
@@ -152,8 +165,8 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         if (!field.parent) return;
 
         const siblings = field.parent.children || [];
-        const allSelected = siblings.every(f => f.included);
-        const noneSelected = siblings.every(f => !f.included);
+        const allSelected = siblings.every((f) => f.included);
+        const noneSelected = siblings.every((f) => !f.included);
 
         field.parent.included = allSelected;
         if (!allSelected && !noneSelected) {
@@ -169,11 +182,17 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
     private getSelectedPaths(): string[][] {
         const paths: string[][] = [];
 
-        const traverse = (fields: FieldSelection[], parentPath: string[] = []) => {
+        const traverse = (
+            fields: FieldSelection[],
+            parentPath: string[] = []
+        ) => {
             for (const field of fields) {
                 const currentPath = [...parentPath, field.name];
 
-                if (field.included && (!field.children || field.children.length === 0)) {
+                if (
+                    field.included &&
+                    (!field.children || field.children.length === 0)
+                ) {
                     paths.push(currentPath);
                 }
 
@@ -191,9 +210,9 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
      * Gets a preview value for a field
      */
     getPreviewValue(field: FieldSelection): string {
-        const sampleData = Array.isArray(this.data.exportData.data)
-            ? this.data.exportData.data[0]
-            : this.data.exportData.data;
+        const sampleData = Array.isArray(this.previewData)
+            ? this.previewData[0]
+            : this.previewData;
 
         const value = field.path.reduce((obj, key) => obj?.[key], sampleData);
 
@@ -201,20 +220,29 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         if (value instanceof Date) {
             switch (this.options.dateFormat) {
                 default:
-                case 'iso': return value.toISOString();
-                case 'local': return value.toLocaleString();
-                case 'unix': return Math.floor(value.getTime() / 1000).toString();
+                case 'iso':
+                    return value.toISOString();
+                case 'local':
+                    return value.toLocaleString();
+                case 'unix':
+                    return Math.floor(value.getTime() / 1000).toString();
             }
         }
-        if (typeof value === 'string') return `"${value.length > 20 ? value.slice(0, 20) + '...' : value}"`;
+        if (typeof value === 'string')
+            return `"${
+                value.length > 20 ? value.slice(0, 20) + '...' : value
+            }"`;
         if (typeof value === 'number') return value.toString();
         if (typeof value === 'boolean') return value.toString();
         if (Array.isArray(value)) {
             const maxItems = this.options.maxArrayItems ?? 2;
-            const preview = value.slice(0, maxItems).map(item => {
-                if (typeof item === 'object') return '{...}';
-                return String(item);
-            }).join(', ');
+            const preview = value
+                .slice(0, maxItems)
+                .map((item) => {
+                    if (typeof item === 'object') return '{...}';
+                    return String(item);
+                })
+                .join(', ');
             return `[${preview}${value.length > maxItems ? ', ...' : ''}]`;
         }
         if (typeof value === 'object') {
@@ -222,7 +250,9 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
             if (keys.length === 0) return '{}';
             const maxKeys = this.options.maxObjectKeys ?? 1;
             const previewKeys = keys.slice(0, maxKeys);
-            return `{ ${previewKeys.map(k => `${k}: ...`).join(', ')}${keys.length > maxKeys ? ', ...' : ''} }`;
+            return `{ ${previewKeys.map((k) => `${k}: ...`).join(', ')}${
+                keys.length > maxKeys ? ', ...' : ''
+            } }`;
         }
         return String(value);
     }
@@ -230,26 +260,28 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
     /**
      * Gets the filtered export data based on field selection
      */
-    private getExportData(): ExportData {
+    private getExportData(data: any = this.data.exportData.data): ExportData {
         const includedPaths = this.getSelectedPaths();
 
         // Filter the data to only include selected fields
-        const filteredData = Array.isArray(this.data.exportData.data)
-            ? this.data.exportData.data.map((item: any) => this.filterObjectByPaths(item, includedPaths))
-            : this.filterObjectByPaths(this.data.exportData.data, includedPaths);
+        const filteredData = Array.isArray(data)
+            ? data.map((item: any) =>
+                  this.filterObjectByPaths(item, includedPaths)
+              )
+            : this.filterObjectByPaths(data, includedPaths);
 
         return {
             data: filteredData,
             filename: this.data.exportData.filename,
-            fields: this.selectedFields
+            fields: this.selectedFields,
         };
     }
 
     /**
      * Gets the export data with all values formatted according to options
      */
-    private getExportFormattedData(): ExportData {
-        const exportData = this.getExportData();
+    private getExportFormattedData(data?: any): ExportData {
+        const exportData = this.getExportData(data);
 
         const formatRecursively = (value: any): any => {
             // First try to format the value directly
@@ -257,13 +289,16 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
 
             // Handle arrays
             if (Array.isArray(value)) {
-                return value.map(item => formatRecursively(item));
+                return value.map((item) => formatRecursively(item));
             }
 
             // Handle objects
             if (typeof value === 'object' && value !== null) {
                 return Object.fromEntries(
-                    Object.entries(value).map(([key, val]) => [key, formatRecursively(val)])
+                    Object.entries(value).map(([key, val]) => [
+                        key,
+                        formatRecursively(val),
+                    ])
                 );
             }
 
@@ -274,8 +309,8 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         return {
             ...exportData,
             data: Array.isArray(exportData.data)
-                ? exportData.data.map(item => formatRecursively(item))
-                : formatRecursively(exportData.data)
+                ? exportData.data.map((item) => formatRecursively(item))
+                : formatRecursively(exportData.data),
         };
     }
 
@@ -300,11 +335,16 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
 
             if (Array.isArray(value)) {
                 // For arrays, we need to apply the subpaths to each item
-                result[root] = value.map(item => {
+                result[root] = value.map((item) => {
                     if (subPaths.length === 0) return this.cloneWithDates(item);
                     return this.filterObjectByPaths(item, subPaths);
                 });
-            } else if (typeof value === 'object' && value !== null && !(value instanceof Date) && subPaths.length > 0) {
+            } else if (
+                typeof value === 'object' &&
+                value !== null &&
+                !(value instanceof Date) &&
+                subPaths.length > 0
+            ) {
                 // Only recurse for objects (not dates) that have subpaths
                 result[root] = this.filterObjectByPaths(value, subPaths);
             } else {
@@ -322,10 +362,14 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
     private cloneWithDates(obj: any): any {
         if (obj === null || obj === undefined) return obj;
         if (obj instanceof Date) return new Date(obj);
-        if (Array.isArray(obj)) return obj.map(item => this.cloneWithDates(item));
+        if (Array.isArray(obj))
+            return obj.map((item) => this.cloneWithDates(item));
         if (typeof obj === 'object') {
             return Object.fromEntries(
-                Object.entries(obj).map(([key, value]) => [key, this.cloneWithDates(value)])
+                Object.entries(obj).map(([key, value]) => [
+                    key,
+                    this.cloneWithDates(value),
+                ])
             );
         }
         return obj;
@@ -335,19 +379,24 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
      * Updates the preview based on current selection and options
      */
     updatePreview(): void {
-        const exportData = this.getExportFormattedData();
-        const previewData = Array.isArray(exportData.data) ? exportData.data.slice(0, 3) : exportData.data;
+        const exportData = this.getExportFormattedData(this.previewData);
+        const previewData = Array.isArray(exportData.data)
+            ? exportData.data.slice(0, 3)
+            : exportData.data;
 
         if (this.data.format === 'csv') {
-            this.preview = toCsv({
-                data: previewData,
-                fields: this.selectedFields,
-                filename: exportData.filename
-            }, {
-                fieldDelimiter: this.options.fieldDelimiter,
-                arrayFormat: this.options.arrayFormat,
-                objectFormat: this.options.objectFormat
-            });
+            this.preview = toCsv(
+                {
+                    data: previewData,
+                    fields: this.selectedFields,
+                    filename: exportData.filename,
+                },
+                {
+                    fieldDelimiter: this.options.fieldDelimiter,
+                    arrayFormat: this.options.arrayFormat,
+                    objectFormat: this.options.objectFormat,
+                }
+            );
         } else {
             this.preview = toJson(previewData);
         }
@@ -363,15 +412,15 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         const csvOptions = {
             fieldDelimiter: this.options.fieldDelimiter,
             arrayFormat: this.options.arrayFormat,
-            objectFormat: this.options.objectFormat
+            objectFormat: this.options.objectFormat,
         };
 
         this.dialogRef.close({
             exportData,
             options: {
                 ...this.options,
-                csvOptions
-            }
+                csvOptions,
+            },
         });
     }
 
@@ -380,7 +429,7 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
      */
     isFieldIndeterminate(field: FieldSelection): boolean {
         if (!field.children?.length) return false;
-        const selectedCount = field.children.filter(f => f.included).length;
+        const selectedCount = field.children.filter((f) => f.included).length;
         return selectedCount > 0 && selectedCount < field.children.length;
     }
 
@@ -391,27 +440,32 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
         if (value instanceof Date) {
             switch (this.options.dateFormat) {
                 default:
-                case 'iso': return value.toISOString();
-                case 'local': return value.toLocaleString();
-                case 'unix': return Math.floor(value.getTime() / 1000);
+                case 'iso':
+                    return value.toISOString();
+                case 'local':
+                    return value.toLocaleString();
+                case 'unix':
+                    return Math.floor(value.getTime() / 1000);
             }
         }
 
         // Handle arrays based on maxArrayItems
         if (Array.isArray(value)) {
             // Always return an array, even if empty
-            const items = this.options.maxArrayItems !== null
-                ? value.slice(0, this.options.maxArrayItems)
-                : [...value];
+            const items =
+                this.options.maxArrayItems !== null
+                    ? value.slice(0, this.options.maxArrayItems)
+                    : [...value];
             return items;
         }
 
         // Handle objects based on maxObjectKeys
         if (typeof value === 'object' && value !== null) {
             const keys = Object.keys(value);
-            const limitedKeys = this.options.maxObjectKeys !== null
-                ? keys.slice(0, this.options.maxObjectKeys)
-                : keys;
+            const limitedKeys =
+                this.options.maxObjectKeys !== null
+                    ? keys.slice(0, this.options.maxObjectKeys)
+                    : keys;
 
             const obj = limitedKeys.reduce((acc, key) => {
                 acc[key] = value[key];
@@ -446,22 +500,26 @@ export class ExportCustomizerComponent implements OnInit, AfterViewInit {
             this.snackBar.open('Preview copied to clipboard', 'Close', {
                 duration: 2000,
                 horizontalPosition: 'center',
-                verticalPosition: 'bottom'
+                verticalPosition: 'bottom',
             });
         });
     }
 
     copy(): void {
-        navigator.clipboard.writeText(toCsv(this.getExportFormattedData(), {
-            fieldDelimiter: this.options.fieldDelimiter,
-            arrayFormat: this.options.arrayFormat,
-            objectFormat: this.options.objectFormat
-        })).then(() => {
-            this.snackBar.open('Preview copied to clipboard', 'Close', {
-                duration: 2000,
-                horizontalPosition: 'center',
-                verticalPosition: 'bottom'
+        navigator.clipboard
+            .writeText(
+                toCsv(this.getExportFormattedData(), {
+                    fieldDelimiter: this.options.fieldDelimiter,
+                    arrayFormat: this.options.arrayFormat,
+                    objectFormat: this.options.objectFormat,
+                })
+            )
+            .then(() => {
+                this.snackBar.open('Preview copied to clipboard', 'Close', {
+                    duration: 2000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'bottom',
+                });
             });
-        });
     }
 }
