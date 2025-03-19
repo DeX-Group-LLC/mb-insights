@@ -21,10 +21,12 @@ import { ThemeService } from './services/theme.service';
         LayoutComponent,
         RouterModule
     ],
-    template: '<app-layout></app-layout>',
-    styles: []
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+    @Input() title = 'Message Broker Insights';
+    @Output() 
     title = 'Message Broker Insights';
     /**
      * Creates an instance of AppComponent.
